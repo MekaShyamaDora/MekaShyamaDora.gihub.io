@@ -1,239 +1,233 @@
-class juego {
+class Game {
 	constructor() {
-		this.NumerosAPI = new Array()
-		this.tarjetas = new Array()
-		this.NivelActual
-		this.CuadrosNivel = [10]
-		this.SeleccionadaUNO
-		this.SeleccionadaDOS
-		this.NTarjetasSeleccionadas = 0
-		this.ContadorVictoria = 0
-		this.movimientos = 0
-		this.containerCargando = document.getElementById('cargando')
-		this.containerMovimientos = document.getElementById('movimientos')
-		this.container = document.getElementById('game')
-		this.time = true
-		this.dataAPI = {
+		this.APINumbers = new Array();
+		this.cards = new Array();
+		this.currentLevel;
+		this.levelCards = [10];
+		this.selectedOne;
+		this.selectedTwo;
+		this.selectedCardsCount = 0;
+		this.victoryCounter = 0;
+		this.moves = 0;
+		this.loadingContainer = document.getElementById('loading');
+		this.movesContainer = document.getElementById('moves');
+		this.container = document.getElementById('game');
+		this.time = true;
+		this.APIdata = {
 			loading: true,
 			error: null,
 			data: {
 				info: {},
 				results: []
 			}
-		}
-		//Cronometro
-		this.primermovimiento = false
-		this.hora = 0
-		this.minutos = 0
-		this.segundos = 0
-		this.decimales = 0
-		this.tiempo = ''
-		this.stop = true
+		};
+		//Timer
+		this.firstMove = false;
+		this.hours = 0;
+		this.minutes = 0;
+		this.seconds = 0;
+		this.decimals = 0;
+		this.timer = '';
+		this.stopTimer = true;
 	}
 
 	fetchCharacters = async () => {
-		this.dataAPI = { loading: true, error: null }
+		this.APIdata = { loading: true, error: null };
 
 		try {
-			const response = await fetch(`https://rickandmortyapi.com/api/character/`)
-			const data = await response.json()
+			const response = await fetch(`https://rickandmortyapi.com/api/character/`);
+			const data = await response.json();
 
-			this.dataAPI = {
+			this.APIdata = {
 				loading: false,
 				data: {
 					info: data.info,
 					results: data.results
 				}
-			}
+			};
 		} catch (error) {
-			this.dataAPI = { loading: false, error: error }
+			this.APIdata = { loading: false, error: error };
 		}
 	}
 
-	async iniciarJuego() {
-		this.NivelActual = 0
-		this.elegirtarjeta = this.elegirtarjeta.bind(this)
-		await this.fetchCharacters()
+	async startGame() {
+		this.currentLevel = 0;
+		this.chooseCard = this.chooseCard.bind(this);
+		await this.fetchCharacters();
 
-		for (let i = 0; i < this.dataAPI.data.info.count; i++) {
-			this.NumerosAPI.push(i + 1)
+		for (let i = 0; i < this.APIdata.data.info.count; i++) {
+			this.APINumbers.push(i + 1);
 		}
 
-		this.NumerosAPI = this.NumerosAPI.sort(function() {
-			return Math.random() - 0.5
-		})
+		this.APINumbers = this.APINumbers.sort(function() {
+			return Math.random() - 0.5;
+		});
 
-		this.NumerosAPI.length = 10
+		this.APINumbers.length = 10;
 
-		const LengthStatic = this.NumerosAPI.length
+		const staticLength = this.APINumbers.length;
 
-		for (let i = 0; i < LengthStatic; i++) {
-			this.NumerosAPI.push(this.NumerosAPI[i])
+		for (let i = 0; i < staticLength; i++) {
+			this.APINumbers.push(this.APINumbers[i]);
 		}
 
-		this.tarjetas.length = this.NumerosAPI.length
+		this.cards.length = this.APINumbers.length;
 
-		this.NumerosAPI = this.NumerosAPI.sort(function() {
-			return Math.random() - 0.5
-		})
-		for (let i = 0; i < this.tarjetas.length; i++) {
-			this.PersonajeTemporal = {}
+		this.APINumbers = this.APINumbers.sort(function() {
+			return Math.random() - 0.5;
+		});
+
+		for (let i = 0; i < this.cards.length; i++) {
+			this.tempCharacter = {};
 
 			try {
 				const response = await fetch(
-					`https://rickandmortyapi.com/api/character/${this.NumerosAPI[i]}`
-				)
-				const data = await response.json()
+					`https://rickandmortyapi.com/api/character/${this.APINumbers[i]}`
+				);
+				const data = await response.json();
 
-				this.PersonajeTemporal = data
+				this.tempCharacter = data;
 			} catch (error) {
-				this.PersonajeTemporal = { error: error }
+				this.tempCharacter = { error: error };
 			}
 
-			this.tarjetas[i] = document.createElement('div')
-			this.tarjetas[i].classList.add('tarjeta')
-			this.tarjetas[i].innerText = this.NumerosAPI[i]
-			this.tarjetas[i].setAttribute('data-position', i)
-			this.tarjetas[i].addEventListener('click', this.elegirtarjeta)
-			this.tarjetas[i].innerHTML =
-				'<div class="front vueltaFront" data-position="' +
+			this.cards[i] = document.createElement('div');
+			this.cards[i].classList.add('card');
+			this.cards[i].innerText = this.APINumbers[i];
+			this.cards[i].setAttribute('data-position', i);
+			this.cards[i].addEventListener('click', this.chooseCard);
+			this.cards[i].innerHTML =
+				'<div class="front flipFront" data-position="' +
 				i +
-				'"></div><div class="back vueltaBack" data-position="' +
+				'"></div><div class="back flipBack" data-position="' +
 				i +
 				'" style="background-image: url(' +
-				this.PersonajeTemporal.image +
+				this.tempCharacter.image +
 				');">' +
 				'' +
-				'</div>'
-			this.container.appendChild(this.tarjetas[i])
+				'</div>';
+			this.container.appendChild(this.cards[i]);
 		}
-		this.containerCargando.style.display = 'none'
-		this.container.style.display = 'flex'
+		this.loadingContainer.style.display = 'none';
+		this.container.style.display = 'flex';
 	}
 
-	agregarEventos(n) {
-		this.tarjetas[n].addEventListener('click', this.elegirtarjeta)
+	addEvents(n) {
+		this.cards[n].addEventListener('click', this.chooseCard);
 	}
 
-	eliminarEventos(n) {
-		this.tarjetas[n].removeEventListener('click', this.elegirtarjeta)
+	removeEvents(n) {
+		this.cards[n].removeEventListener('click', this.chooseCard);
 	}
 
-	elegirtarjeta(e) {
+	chooseCard(e) {
 		if (this.time === true) {
-			switch (this.NTarjetasSeleccionadas) {
+			switch (this.selectedCardsCount) {
 				case 0:
-					if (!this.primermovimiento) {
-						this.IniciarCronometro()
+					if (!this.firstMove) {
+						this.startTimer();
 					}
-					this.primermovimiento = true
-					this.SeleccionadaUNO = e.target.dataset.position
-					this.tarjetas[this.SeleccionadaUNO].classList.add('rotar')
-					this.eliminarEventos(this.SeleccionadaUNO)
-					this.NTarjetasSeleccionadas++
-					this.movimientos++
-					this.containerMovimientos.innerText = `Movimientos: ${this.movimientos}`
-					break
+					this.firstMove = true;
+					this.selectedOne = e.target.dataset.position;
+					this.cards[this.selectedOne].classList.add('rotate');
+					this.removeEvents(this.selectedOne);
+					this.selectedCardsCount++;
+					this.moves++;
+					this.movesContainer.innerText = `Moves: ${this.moves}`;
+					break;
 				case 1:
-					this.movimientos++
-					this.containerMovimientos.innerText = `Movimientos: ${this.movimientos}`
-					this.SeleccionadaDOS = e.target.dataset.position
-					this.tarjetas[this.SeleccionadaDOS].classList.add('rotar')
+					this.moves++;
+					this.movesContainer.innerText = `Moves: ${this.moves}`;
+					this.selectedTwo = e.target.dataset.position;
+					this.cards[this.selectedTwo].classList.add('rotate');
 					if (
-						this.NumerosAPI[this.SeleccionadaUNO] ===
-						this.NumerosAPI[this.SeleccionadaDOS]
+						this.APINumbers[this.selectedOne] ===
+						this.APINumbers[this.selectedTwo]
 					) {
-						console.log('correcto')
-						this.eliminarEventos(this.SeleccionadaDOS)
-						this.ContadorVictoria++
-						if (this.ContadorVictoria === this.CuadrosNivel[this.NivelActual]) {
+						console.log('correct');
+						this.removeEvents(this.selectedTwo);
+						this.victoryCounter++;
+						if (this.victoryCounter === this.levelCards[this.currentLevel]) {
 							setTimeout(() => {
-								this.victoria()
-							}, 1000)
+								this.victory();
+							}, 1000);
 						}
 					} else {
-						console.log('incorrecto')
-						this.time = false
+						console.log('incorrect');
+						this.time = false;
 						setTimeout(() => {
-							this.tarjetas[this.SeleccionadaUNO].classList.remove('rotar')
-							this.tarjetas[this.SeleccionadaDOS].classList.remove('rotar')
-							this.time = true
-						}, 1000)
-						this.agregarEventos(this.SeleccionadaUNO)
+							this.cards[this.selectedOne].classList.remove('rotate');
+							this.cards[this.selectedTwo].classList.remove('rotate');
+							this.time = true;
+						}, 1000);
+						this.addEvents(this.selectedOne);
 					}
-					this.NTarjetasSeleccionadas = 0
-					break
+					this.selectedCardsCount = 0;
+					break;
 			}
 		}
 	}
 
-	victoria() {
-		this.PausarTiempo()
+	victory() {
+		this.pauseTimer();
 		swal(
-			'Ganaste!',
-			`Movimientos: ${this.movimientos} \n\n Tiempo: ${this.tiempo}`,
+			'You Win!',
+			`Moves: ${this.moves} \n\n Time: ${this.timer}`,
 			'success'
 		).then(() => {
-			console.log('hola')
-		})
+			console.log('hello');
+		});
 	}
 
-	juegoNuevo() {
-		location.reload()
+	newGame() {
+		location.reload();
 	}
 
 	getRndInteger(min, max) {
-		return Math.floor(Math.random() * (max - min + 1)) + min
+		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
-	//Cronometro
-	IniciarCronometro() {
-		if (this.stop == true) {
-			this.stop = false
-			this.cronometro()
+	//Timer
+	startTimer() {
+		if (this.stopTimer == true) {
+			this.stopTimer = false;
+			this.timerFunc();
 		}
 	}
 
-	cronometro() {
-		if (this.stop == false) {
-			this.decimales++
-			if (this.decimales > 9) {
-				this.decimales = 0
-				this.segundos++
+	timerFunc() {
+		if (this.stopTimer == false) {
+			this.decimals++;
+			if (this.decimals > 9) {
+				this.decimals = 0;
+				this.seconds++;
 			}
-			if (this.segundos > 59) {
-				this.segundos = 0
-				this.minutos++
+			if (this.seconds > 59) {
+				this.seconds = 0;
+				this.minutes++;
 			}
-			if (this.minutos > 59) {
-				this.minutos = 0
-				this.hora++
+			if (this.minutes > 59) {
+				this.minutes = 0;
+				this.hours++;
 			}
-			this.verCronometro()
-			setTimeout('iniciar.cronometro()', 100)
+			this.displayTimer();
+			setTimeout('game.timerFunc()', 100);
 		}
 	}
-	verCronometro() {
-		if (this.hora < 10) this.tiempo = ''
-		else this.tiempo = this.hora
-		if (this.minutos < 10) this.tiempo = this.tiempo + '0'
-		this.tiempo = this.tiempo + this.minutos + ':'
-		if (this.segundos < 10) this.tiempo = this.tiempo + '0'
-		this.tiempo = this.tiempo + this.segundos
-		document.getElementById('tiempo').innerHTML = this.tiempo
+	displayTimer() {
+		if (this.hours < 10) this.timer = '';
+		else this.timer = this.hours;
+		if (this.minutes < 10) this.timer = this.timer + '0';
+		this.timer = this.timer + this.minutes + ':';
+		if (this.seconds < 10) this.timer = this.timer + '0';
+		this.timer = this.timer + this.seconds;
+		document.getElementById('timer').innerHTML = this.timer;
 	}
-	PausarTiempo() {
-		this.stop = true
+	pauseTimer() {
+		this.stopTimer = true;
 	}
-	ReiniciarTiempo() {
-		if (this.stop == false) {
-			this.stop = true
+	resetTimer() {
+		if (this.stopTimer == false) {
+			this.stopTimer = true;
 		}
-		this.hora = this.minutos = this.segundos = this.decimales = 0
-		this.tiempo = ''
-		this.verCronometro()
-	}
-}
-
-const iniciar = new juego()
-iniciar.iniciarJuego()
+		this.hours = this.minutes = this.seconds = this.dec
