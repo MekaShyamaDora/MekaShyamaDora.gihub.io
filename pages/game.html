@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,16 +14,16 @@
 		<link rel="stylesheet" href="../css/game.css" />
 	</head>
 	<body>
-		<div id="cargando">
+		<div id="loading">
 			<img class="rotate" src="../img/portal.png" alt="" />
 			<p>Loading...</p>
 		</div>
 		<div id="game"></div>
 		<div class="info-game">
-			<div id="movimientos">Movimientos: 0</div>
-			<div id="tiempo">00:00</div>
-			<button class="noSelect" onclick="iniciar.juegoNuevo()">
-				Juego nuevo
+			<div id="moves">Moves: 0</div>
+			<div id="timer">00:00</div>
+			<button class="noSelect" onclick="start.newGame()">
+				New Game
 			</button>
 		</div>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
